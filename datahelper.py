@@ -32,7 +32,8 @@ class DataHelper(udata.Dataset):
         inputs= np.array(h5[key])[:5,:,:]  #(5,50,50)
         target= np.array(h5[key])[-1,:,:][np.newaxis,:,:]  #(1,50,50)
         # normalization
-        
+        inputs[inputs<0]=-1
+        target[target<0]=-1
         h5.close()
 
         return torch.Tensor(inputs), torch.Tensor(target)
