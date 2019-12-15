@@ -9,10 +9,11 @@ from loss import SSIM
 import numpy as np
 from model import benchmark
 
-USE_GPU= False
+
+USE_GPU= True
 LR= 1e-3
-BSIZE= 8
-EPOCH= 1000
+BSIZE= 32
+EPOCH= 100
 
 def num_params(net):
     num_params= 0
@@ -32,9 +33,11 @@ def train():
     if USE_GPU:
         model= model.cuda()
     
-    criterion = SSIM()
+#     criterion = SSIM()
+    criterion= nn.MSELoss()
     optimizer= torch.optim.Adam(model.parameters(), lr= LR)
-    scheduler= MultiStepLR(optimizer, milestones= [200,400,600], gamma=0.1)
+    scheduler= MultiStepLR(optimizer, milestones= [20,40,60], gamma=0.1)
+
 
     for epoch in range(EPOCH):
         print('-'*30)
@@ -47,22 +50,26 @@ def train():
             model.train()
 
             inputs, target= Variable(inputs), Variable(target)
-
+            
             if USE_GPU:
                 inputs, target= inputs.cuda(), target.cuda()
+                criterion= criterion.cuda()
 
             out= model(inputs)
-
-            loss= criterion(out, target)
+            
+            
+            loss= criterion(out[target>0], target[target>0])
+            
+            acc= nn.MSELoss()(out, target).item()
 
             loss.backward()
             optimizer.step()
             
-            print('[%d/%d][%d/%d]  loss: %.4f'%(epoch, EPOCH, i, len(dataLoader), loss.item()))
+            print('[%d/%d][%d/%d]  loss: %.4f Spatial loss: %.4f'%(epoch, EPOCH, i, len(dataLoader), loss.item(), acc))
 
         scheduler.step()
 
-        if epoch%100 == 0:
+        if epoch%50 == 0:
             torch.save(model.state_dict, 'model-epoch-%d-benchmark.pth'%epoch)
             
 

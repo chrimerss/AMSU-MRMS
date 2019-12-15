@@ -9,9 +9,14 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import torchvision
 
+
 def benchmark():
     model= torchvision.models.vgg19(pretrained=True).features
     model[0]= nn.Conv2d(5,64,3,1,1)
+    i=0
+    for ind in [4, 9, 18, 27, 36]:
+        del model[ind-i]
+        i+=1
     first= True
     for param in model.parameters():
         if first:
