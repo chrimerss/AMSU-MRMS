@@ -23,20 +23,21 @@ def prepare():
             if len(mask)!=0:  #if no data observed in US boundary 
                 inputChannels= ['c1_amsub', 'c2_amsub', 'c3_amsub', 'c4_amsub', 'c5_amsub', 'aver_precip_nssl'] # input channels, all use amsu-b
                 for processedData in preprocess(inputChannels, data, mask):
-                    print(processedData.shape)
-                    c,m,n= processedData.shape
-                    for i in range(0,m-50,20):
-                        for j in range(0, n-50, 10):
-                            _data= processedData[:,i:i+50, j:j+50]
-                            if ind%7!=0:
-                                train_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
-                            else:
-                                test_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
-                    #     randomCrop(ind, train_h5, processedData)
-                    # elif ind%3!=0:
-                    #     randomCrop(ind, test_h5, processedData)
-                    ind+=1
-                    print('%d/%d'%(ind, len(dataPath)))
+                    if np.nanmean(processedData[-1,:,:])>0.5: # constrain record rainy samples
+                        print(processedData.shape)
+                        c,m,n= processedData.shape
+                        for i in range(0,m-50,20):
+                            for j in range(0, n-50, 10):
+                                _data= processedData[:,i:i+50, j:j+50]
+                                if ind%7!=0:
+                                    train_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
+                                else:
+                                    test_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
+                        #     randomCrop(ind, train_h5, processedData)
+                        # elif ind%3!=0:
+                        #     randomCrop(ind, test_h5, processedData)
+                        ind+=1
+                        print('%d/%d'%(ind, len(dataPath)))
     train_h5.close()
     test_h5.close()
 
