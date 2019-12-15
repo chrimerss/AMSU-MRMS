@@ -17,7 +17,7 @@ EPOCH= 1000
 def num_params(net):
     num_params= 0
     for param in net.parameters():
-        num_params+= param.numerl()
+        num_params+= param.numel()
 
     print('Total number of parameters: %d'%num_params)
 
