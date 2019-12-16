@@ -14,7 +14,7 @@ def prepare():
     ind= 0 # to construct key
     for each in dirs:
         dataPath= glob(each+'/*.nc') # find all .nc file
-        print(dataPath)
+        # print(dataPath)
         for single in dataPath:
             data= Dataset(single, 'r') #read in netCDF4 object
             lons= data['lon_amsub']    #store longitudes
@@ -23,7 +23,8 @@ def prepare():
             if len(mask)!=0:  #if no data observed in US boundary 
                 inputChannels= ['c1_amsub', 'c2_amsub', 'c3_amsub', 'c4_amsub', 'c5_amsub', 'aver_precip_nssl'] # input channels, all use amsu-b
                 for processedData in preprocess(inputChannels, data, mask):
-                    if np.nanmean(processedData[-1,:,:])>0.5: # constrain record rainy samples
+                    target= processedData[-1,:,:]
+                    if np.nanmean(target[target>0])>0.25: # constrain record rainy samples
                         print(processedData.shape)
                         c,m,n= processedData.shape
                         for i in range(0,m-50,20):
@@ -36,8 +37,9 @@ def prepare():
                         #     randomCrop(ind, train_h5, processedData)
                         # elif ind%3!=0:
                         #     randomCrop(ind, test_h5, processedData)
-                        ind+=1
-                        print('%d/%d'%(ind, len(dataPath)))
+                    ind+=1
+                    
+                    print('%d/%d'%(ind, len(dataPath)))
     train_h5.close()
     test_h5.close()
 
@@ -50,7 +52,7 @@ def randomCrop(ind, h5, data):
 
 
 def preprocess(channels, data, mask):
-    print('preprocess...')
+    # print('preprocess...')
     if ((mask[1:]- mask[:-1]>1)).any():
         intermit= np.where((mask[1:] - mask[:-1])>1)[0]
         # print(mask)
