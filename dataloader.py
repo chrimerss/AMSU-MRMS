@@ -7,8 +7,8 @@ import numpy as np
 
 def prepare():
     # initialize two .h5 file, one for training, the other one for testing 7/3
-    train_h5= h5py.File('training.h5', 'w')
-    test_h5 = h5py.File('testing.h5', 'w')
+    train_h5= h5py.File('training2.h5', 'w')
+    test_h5 = h5py.File('testing2.h5', 'w')
     # directories to store data
     dirs= ['/Users/hydrosou/Documents/NOAA18/AMSU_GROUND_MERGE_CORRECTED_2', '~/Documents/NOAA19/AMSU_GROUND_MERGE_CORRECTED_2']
     ind= 0 # to construct key
@@ -21,19 +21,21 @@ def prepare():
             lats= data['lat_amsub']    #store latitudes
             mask= np.where((lons[:,0]<=-60) & (lons[:,-1]>=-130) & (lats[:, 0]<=55) & (lats[:, -1]>=25))[0] #mask out US boundary
             if len(mask)!=0:  #if no data observed in US boundary 
-                inputChannels= ['c1_amsub', 'c2_amsub', 'c3_amsub', 'c4_amsub', 'c5_amsub', 'aver_precip_nssl'] # input channels, all use amsu-b
+                inputChannels= ['c1_amsua', 'c2_amsua','c15_amsua','c1_amsub', 'c2_amsub', 'c3_amsub', 'c4_amsub', 'c5_amsub','aver_precip_nssl'] # input channels, all use amsu-b
                 for processedData in preprocess(inputChannels, data, mask):
                     target= processedData[-1,:,:]
-                    if np.nanmean(target[target>0])>0.25: # constrain record rainy samples
+                    randLayer= np.random.randint(8)
+                    if np.nanmean(target[target>0])>1:# constrain record rainy samples
                         print(processedData.shape)
                         c,m,n= processedData.shape
-                        for i in range(0,m-50,20):
-                            for j in range(0, n-50, 10):
-                                _data= processedData[:,i:i+50, j:j+50]
-                                if ind%7!=0:
-                                    train_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
-                                else:
-                                    test_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
+                        for i in range(0,m-64,20):
+                            for j in range(0, n-64, 5):
+                                _data= processedData[:,i:i+64, j:j+64]
+                                if (_data[randLayer,:,:]>0).any() and np.nanmean(_data[-1,:,:][_data[-1,:,:]>0])>0.5:
+                                    if ind%7!=0:
+                                        train_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
+                                    else:
+                                        test_h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
                         #     randomCrop(ind, train_h5, processedData)
                         # elif ind%3!=0:
                         #     randomCrop(ind, test_h5, processedData)
@@ -45,8 +47,8 @@ def prepare():
 
 def randomCrop(ind, h5, data):
     c,m,n= data.shape
-    for i in range(0,m-50,20):
-        for j in range(0, n-50, 10):
+    for i in range(0,m-64,20):
+        for j in range(0, n-64, 5):
             _data= data[:,i:i+50, j:j+50]
             h5.create_dataset(str(ind)+'-'+str(i)+'-'+str(j), data=_data)
 

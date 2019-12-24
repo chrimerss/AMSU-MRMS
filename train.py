@@ -1,6 +1,6 @@
 '''
 using DALI batch_size= 256 costs 4.06 minutes for one epoch
-without DALI, it costs 
+without DALI, it costs 12 minutes
 '''
 import torch
 import torch.nn as nn

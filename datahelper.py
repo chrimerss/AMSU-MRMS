@@ -21,7 +21,9 @@ class DataHelper(udata.Dataset):
         if type == 'train':
             h5= h5py.File('training.h5', 'r')
         elif type =='test':
-            h5 = h5py.File('/kaggle/input/datausedtotrain/testing.h5', 'r')
+            h5 = h5py.File('testing.h5', 'r')
+        elif type=='val':
+            h5 = h5py.File('validation.h5', 'r')
         else:
             raise FileNotFoundError('expected type in "train" or "test"!')
 
