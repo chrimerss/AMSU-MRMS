@@ -18,7 +18,7 @@ As for the target, we mapped NSSL MRMS (multi-radar multi-sensor) ground based r
 ## Satellite imagery segmentation
 In the imagery segmentation, we performed UNet with pretrained model that trained by imagenet.
 
-<img src='https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/u-net-architecture.png'>
+<img src='src/u-net-architecture.png'>
 
 
 ## Rainfall retrieval
