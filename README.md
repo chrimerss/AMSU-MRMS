@@ -2,7 +2,7 @@
 
 |Model description|inputs|learning type|epoches|loss|dice|threshold|name|
 |:---------------:|:----:|:-----------:|:-----:|:--:|:--:|:-------:|:--:|
-|UNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100||||segmentation-class1|
+|UNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.78||segmentation-class1|
 
 
 In this study, we take two steps towards passive microwave (AMSU) precipitation retrival: first, segment satellite imagery into rain and no-rain classes (binary); second, apply second-round ML with rainy pixels.
@@ -20,5 +20,14 @@ In the imagery segmentation, we performed UNet with pretrained model that traine
 
 <img src='src/u-net-architecture.png'>
 
+### Comb1 - UNet + ResNet18 + 8 channels + 1 class 
+__Loss__
+<img src='src/UNetRes18-1class-8channels-loss.png'>
+
+__Dice__
+<img src='src/UNetRes18-1class-8channels-dice.png'>
+
+__Results__
+<img src='src/UNetRes18-1class-8channels-results.png'>
 
 ## Rainfall retrieval
