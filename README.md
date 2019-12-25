@@ -25,17 +25,19 @@ In the imagery segmentation, we performed LinkNet with pretrained model that tra
 
 ### Comb1 - UNet + ResNet18 + 8 channels + 1 class 
 __Loss__
-<img src='src/UNetRes18-1class-8channels-loss.png'>
+<img src='src/LinkNetRes18-1class-8channels-loss.png'>
 
 <p align="center"> Fig.2 Loss evolution with epoches
 
 __Dice__
-<img src='src/UNetRes18-1class-8channels-dice.png'>
+<img src='src/LinkNetRes18-1class-8channels-dice.png'>
 
 <p align="center"> Fig.3 Dice evolution with epoches
 
 __Results__
-<img src='src/UNetRes18-1class-8channels-results.png'>
+<img src='src/LinkNetRes18-1class-8channels-results.png'>
+
+<img src='src/LinkNetRes18-1class-8channels-boxplot.png'>
 
 <p align="center"> Fig.4 LinkNet-1class-8channels-benchmark results 
 
