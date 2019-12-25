@@ -35,9 +35,10 @@ __Dice__
 <p align="center"> Fig.3 Dice evolution with epoches
 
 __Results__
-<img src='src/LinkNetRes18-1class-8channels-results.png'>
+<img src='src/LinkNetRes18-1class-8channels-kernelweights.png'>
 
-<img src='src/LinkNetRes18-1class-8channels-boxplot.png'>
+
+<p align="center"> <img src='src/LinkNetRes18-1class-8channels-boxplot.png' width="50%">
 
 <p align="center"> Fig.4 LinkNet-1class-8channels-benchmark results 
 
