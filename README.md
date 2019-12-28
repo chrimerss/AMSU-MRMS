@@ -3,6 +3,7 @@
 |Model description|inputs|learning type|epoches|loss|dice|threshold|name|
 |:---------------:|:----:|:-----------:|:-----:|:--:|:--:|:-------:|:--:|
 |LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.78|0.9|segmentation-class1|
+|LinkNet+ResNet18|amsu-b (4channels)|unfreeze|100|
 
 
 In this study, we take two steps towards passive microwave (AMSU) precipitation retrival: first, segment satellite imagery into rain and no-rain classes (binary); second, apply second-round ML with rainy pixels.
@@ -35,6 +36,8 @@ __Dice__
 <p align="center"> Fig.3 Dice evolution with epoches
 
 __Results__
+
+<p align="center"> 
 <img src='src/LinkNetRes18-1class-8channels-kernelweights.png'>
 
 
