@@ -2,7 +2,7 @@
 
 |Model description|inputs|learning type|epoches|loss|dice|threshold|name|
 |:---------------:|:----:|:-----------:|:-----:|:--:|:--:|:-------:|:--:|
-|LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.95|-4.464768/7|segmentation-class1|
+|LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.95|0.9|segmentation-class1|
 |LinkNet+ResNet18|amsu-b (4channels)|unfreeze|100|0.60|0.82|0.75|Segmentation-4channels
 
 
@@ -51,9 +51,6 @@ __Results__
 
 <p align="center"> Fig.5 PR-AUC curve to determine the best threshold 
 
-<p align="center"> <img src='src/LinkNet-1class-8channels-optimalSurface.png' width="60%">
-
-<p align="center"> Fig.6 objective surface plot.
 
 ## Rainfall retrieval
 
