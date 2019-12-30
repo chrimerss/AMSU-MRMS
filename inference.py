@@ -8,7 +8,7 @@ from catalyst.dl.callbacks import InferCallback, CheckpointCallback
 import numpy as np
 import cv2
 
-def infer(model, pth, **kwargs):
+def infer(model,type, pth, **kwargs):
     '''
     runs inference for specific model
     Args:
@@ -16,17 +16,19 @@ def infer(model, pth, **kwargs):
     :model - pytorch model object
     :pth - str; where put the .pth kernel weights
     :kargs - {
+        'channels': int (4/8)
         'threshold': int,    #threshold to binarize mask, usually find the optimal with PR AUC curve
-        'n_components': int    # how many connected components are considered as real; to filter out noise
+        'min_size': int    # how many connected components are considered as real; to filter out noise
         }
 
     Output:
     --------------------
     :pr_mask - predicted mask according to the order of the validation set
     '''
-
-    test_data= DataHelper('val')
+    channels= kwargs.get('channels', 8)
+    test_data= DataHelper(type, channels)
     test_loader= DataLoader(test_data, batch_size=8, shuffle=False)
+    
     runner= SupervisedRunner()
     loaders= {"infer": test_loader}
     runner.infer(
@@ -39,19 +41,18 @@ def infer(model, pth, **kwargs):
                     ]
                 )
 
-    valid_masks= []
+    probabilities= []
     pr_mask= np.zeros((len(test_data),64,64))
 
     for i, (batch, output) in enumerate(zip(test_data, runner.callbacks[0].predictions['logits'])):
-        print('%d/%d'%(i, len(probabilities)))
+        # print('%d/%d'%(i, len(probabilities)))
         _, mask= batch #(1,64,64)
-        for m in mask:
-            valid_masks.append(m)
         
         for j, probability in enumerate(output):
-            pr_mask[i+j,:, :], _= post_process(probability, **kwargs)
+            probabilities.append(probability)
+            pr_mask[i+j,:, :], _= post_process(probability, threshold=kwargs.get('threshold', 0.9), min_size=kwargs.get('min_size', 5))
 
-    return pr_mask
+    return probabilities, pr_mask
             
 
 def post_process(probability, threshold, min_size):

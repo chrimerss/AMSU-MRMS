@@ -2,8 +2,8 @@
 
 |Model description|inputs|learning type|epoches|loss|dice|threshold|name|
 |:---------------:|:----:|:-----------:|:-----:|:--:|:--:|:-------:|:--:|
-|LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.78|0.9|segmentation-class1|
-|LinkNet+ResNet18|amsu-b (4channels)|unfreeze|100|
+|LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.95|0.9|segmentation-class1|
+|LinkNet+ResNet18|amsu-b (4channels)|unfreeze|100|0.60|0.82|0.75|Segmentation-4channels
 
 
 In this study, we take two steps towards passive microwave (AMSU) precipitation retrival: first, segment satellite imagery into rain and no-rain classes (binary); second, apply second-round ML with rainy pixels.
@@ -43,6 +43,26 @@ __Results__
 
 <p align="center"> <img src='src/LinkNetRes18-1class-8channels-boxplot.png' width="50%">
 
+<p align="center"> <img src="src/LinkNet-1class-8channels-confusionMatrix-test.png" width="50%"><img src="src/LinkNet-1class-8channels-confusionMatrix-val-benchmark.png" width="50%">
+
 <p align="center"> Fig.4 LinkNet-1class-8channels-benchmark results 
 
+<p align="center"> <img src='src/LinkNet-1class-8channels-PRAUC_curve.png' width="100%">
+
+<p align="center"> Fig.5 PR-AUC curve to determine the best threshold 
+
+
 ## Rainfall retrieval
+
+Attempt to use Random forest Regressor to quantify rain rate with grid search. The validation is based on KFolds, specifically 5 folds to validate data. It is running in 48 cores server, and it costs 60 hours to complete.
+
+```python
+# Grid search for hyperparameter tuning
+rf= RandomForestRegressor()
+hyperparam_grid= {
+    'n_estimators': np.arange(10,500,20),
+    'max_depth': np.arange(10,50,5),
+    'warm_start':[True, False]
+}
+gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', verbose=2, n_jobs=-1)
+```
