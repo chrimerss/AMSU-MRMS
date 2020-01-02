@@ -9,6 +9,7 @@ from matplotlib import cm
 
 from sklearn.metrics import explained_variance_score, confusion_matrix
 from sklearn.metrics import roc_curve, precision_recall_curve, auc
+from mpl_toolkits.mplot3d import Axes3D
 
 def confusion_mtx_colormap(mtx, xnames, ynames, charlabel= "", **figkwargs):
     '''
@@ -160,51 +161,6 @@ def plot_confusion_matrix(cm, classes, normalize=False,
     plt.tight_layout()
     plt.savefig('confusion_mtx', bbox_inches="tight")
 
-# Generate a color map plot for a confusion matrix
-def confusion_mtx_colormap(mtx, xnames, ynames, cbarlabel=""):
-    ''' 
-    Generate a figure that plots a colormap of a matrix
-    PARAMS:
-        mtx: matrix of values
-        xnames: list of x tick names
-        ynames: list of the y tick names
-        cbarlabel: label for the color bar
-    RETURNS:
-        fig, ax: the corresponding handles for the figure and axis
-    '''
-    nxvars = mtx.shape[1]
-    nyvars = mtx.shape[0]
-
-    # create the figure and plot the correlation matrix
-    fig, ax = plt.subplots()
-    im = ax.imshow(mtx, cmap='summer', zorder=1)
-    if not cbarlabel == "":
-        cbar = ax.figure.colorbar(im, ax=ax)
-        cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
-
-    # Specify the row and column ticks and labels for the figure
-    ax.set_xticks(range(nxvars))
-    ax.set_yticks(range(nyvars))
-    ax.set_xticklabels(xnames)
-    ax.set_yticklabels(ynames)
-    ax.set_xlabel("Predicted Labels")
-    ax.set_ylabel("Actual Labels")
-
-    # Rotate the tick labels and set their alignment.
-    plt.setp(ax.get_xticklabels(), rotation=45, 
-             ha="right", rotation_mode="anchor")
-
-    # Loop over data dimensions and create text annotations.
-    lbl = np.array([['TN', 'FP'], ['FN', 'TP']])
-    for i in range(nyvars):
-        for j in range(nxvars):
-            thresh = mtx.sum() / 2
-            text = ax.text(j, i, "%s = %.3f" % (lbl[i,j], mtx[i, j]),
-                           ha='center', va='center', color='k' if mtx[i, j] > thresh else 'w')
-            #text.set_path_effects([peffects.withStroke(linewidth=1.5, 
-				#foreground='w' if mtx[i, j] > .5 else 'k' )])
-
-    return fig, ax
 
 # Compute the ROC and PR Curves and generate the KS plot
 def ks_roc_prc_plot(targets, scores, FIGWIDTH=15, FIGHEIGHT=6, FONTSIZE=14):
@@ -274,3 +230,23 @@ def ks_roc_prc_plot(targets, scores, FIGWIDTH=15, FIGHEIGHT=6, FONTSIZE=14):
     #print("PRC AUC:", auc_prc)
 
     return roc_results, prc_results, fig, axs
+
+def objective_surface3D(paramX,paramY,z, view_angle=30, view_elev=30):
+
+    fig= plt.figure(figsize=(10,10))
+    x,y= np.meshgrid(paramX, paramY)
+    assert x.shape==z.shape, 'expected z: %s, but get %s'%(str(x.shape), str(z.shape))
+    ax= fig.gca(projection='3d')
+    ax.plot_surface(x,y, z, cmap='jet')
+    ax.view_init(view_elev,view_angle)
+    ax.set_xlabel('thresholds')
+    ax.set_ylabel('components')
+    ax.set_zlabel('K-S distance')
+    #find optimal
+    zmax= np.argmax(z)
+    optimY= zmax//paramX
+    optimX= zmax%paramY
+    # ax.scatter(-4.5,7,0.9, edgecolors='k', facecolors='none')
+    ax.text(optimX, optimY, z[zmax], 'optimal point (-4.5,7,0.76)')
+
+    return fig, ax
