@@ -1,12 +1,12 @@
 # Passive Microwave Precipitation Retrieval with deep learning
 
-|Model description|inputs|learning type|epoches|loss|dice|threshold|name|
-|:---------------:|:----:|:-----------:|:-----:|:--:|:--:|:-------:|:--:|
-|LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.95|-4.464768/7|segmentation-class1|
-|LinkNet+ResNet18|amsu-b (4channels)|unfreeze|100|0.60|0.82|0.75|Segmentation-4channels
+
 
 
 In this study, we take two steps towards passive microwave (AMSU) precipitation retrival: first, segment satellite imagery into rain and no-rain classes (binary); second, apply second-round ML with rainy pixels.
+
+<p align="center"><img src="src/schematic_view.png">
+<p align="center">Fig.1 Schematic overview of the pipeline processing AMSU data.
 
 ## Pre-process
 
@@ -18,22 +18,28 @@ As for the target, we mapped NSSL MRMS (multi-radar multi-sensor) ground based r
 
 ## Satellite imagery segmentation
 In the imagery segmentation, we performed LinkNet with pretrained model that trained by imagenet.
+
+|Model description|inputs|learning type|epoches|loss|dice|threshold|name|
+|:---------------:|:----:|:-----------:|:-----:|:--:|:--:|:-------:|:--:|
+|LinkNet+ResNet18|amsu-a(1,2,3,4)+amsu-b(5 channels)|unfreeze|100|0.68|0.95|-4.464768/7|segmentation-class1|
+|LinkNet+ResNet18|amsu-b (4channels)|unfreeze|100|0.60|0.82|0.75|Segmentation-4channels
+
 <p align="center">
 <img src='src/LinkNet-architecture.png'>
 
-<p align="center"> Fig.1 LinkNet Architecture
+<p align="center"> Fig.2 LinkNet Architecture
 
 
 ### Comb1 - UNet + ResNet18 + 8 channels + 1 class 
 __Loss__
 <img src='src/LinkNetRes18-1class-8channels-loss.png'>
 
-<p align="center"> Fig.2 Loss evolution with epoches
+<p align="center"> Fig.3 Loss evolution with epoches
 
 __Dice__
 <img src='src/LinkNetRes18-1class-8channels-dice.png'>
 
-<p align="center"> Fig.3 Dice evolution with epoches
+<p align="center"> Fig.4 Dice evolution with epoches
 
 __Results__
 
@@ -45,15 +51,15 @@ __Results__
 
 <p align="center"> <img src="src/LinkNet-1class-8channels-confusionMatrix-test.png" width="50%"><img src="src/LinkNet-1class-8channels-confusionMatrix-val-benchmark.png" width="50%">
 
-<p align="center"> Fig.4 LinkNet-1class-8channels-benchmark results 
+<p align="center"> Fig.5 LinkNet-1class-8channels-benchmark results 
 
 <p align="center"> <img src='src/LinkNet-1class-8channels-PRAUC_curve.png' width="100%">
 
-<p align="center"> Fig.5 PR-AUC curve to determine the best threshold 
+<p align="center"> Fig.6 PR-AUC curve to determine the best threshold 
 
 <p align="center"> <img src='src/LinkNet-1class-8channels-optimalSurface.png' width="60%">
 
-<p align="center"> Fig.6 objective surface plot.
+<p align="center"> Fig.7 objective surface plot.
 
 ## Rainfall retrieval
 
@@ -78,8 +84,8 @@ gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', 
 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-spatial.png'>
 
-<p align="center"> Fig.7 Spatial rainfall map for benchmark and model-1
+<p align="center"> Fig.8 Spatial rainfall map for benchmark and model-1
 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-rmse.png', width="50%">
 
-<p align="center"> Fig.7 RMSE results for benchmark and model-1
+<p align="center"> Fig.9 RMSE results for benchmark and model-1
