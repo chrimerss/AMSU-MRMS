@@ -40,3 +40,50 @@ def dice(img1, img2):
     
     return 2.*intersection.sum()/(img1.sum()+img2.sum())
 
+def computeRMSE(rfModel, segModel, amsuRain):
+    '''
+    This function computes RMSE with given random forest model and segmentation model
+
+    Args:
+    -----------------
+    :rfModel - RandomForestRegressor object;
+    :segModel - torch.nn.Module object;
+    :amsuRain - numpy.array object; rain rate by inherent algorithm
+
+    Output:
+    -----------------
+    :RMSE_bench - RMSE calculated by AMSU rain rate and reference
+    :RMSE_est - RMSE calculated by random forest and reference
+    '''
+    testhelper= DataRainRate('test')
+    RMSEs_bench= []
+    RMSEs_est = []
+    for ind in range(len(testhelper)):
+        print('%d/%d' %(ind,len(testhelper)))
+        ins, outs= testhelper[ind]
+        outs= outs.numpy().squeeze()
+#         ins= ins.numpy().squeeze()
+        mask= segModel(ins.view(1,8,64,64)).detach().numpy().squeeze()
+        mask, _= post_process(mask, threshold=-4.464768, min_size=7)
+        rows, cols= np.where(mask==0)
+        ins[:, rows, cols]=0
+
+        rows, cols= np.where(mask!=0)
+        feas= np.zeros((len(rows), 8))
+        for l in range(8):
+            feas[:,l]= ins[l, rows, cols]
+        sims= rfModel.predict(feas)
+        rains= np.zeros(outs.shape)
+        rains[rows, cols]= sims
+        
+        amsu= amsuRain[ind]
+        RMSEs_est.append(rmse(rains.reshape(-1,1), outs.reshape(-1,1)))
+        RMSEs_bench.append(rmse(amsu.reshape(-1,1), outs.reshape(-1,1)))
+        
+    return RMSEs_est, RMSEs_bench
+
+def rmse(x1, x2):
+    '''
+    Compute RMSE of two arrays
+    '''
+    return ((((x1-x2)**2).sum())/len(x1))**0.5

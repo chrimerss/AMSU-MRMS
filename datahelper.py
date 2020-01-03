@@ -152,12 +152,10 @@ class DataRainRate(udata.Dataset):
         return len(self.keys)
     
     def val_data(self):
-        h5= h5py.File('validating2.h5', 'r')
+        h5= h5py.File('testing2.h5', 'r')
         amsuRR= np.zeros((len(self.keys), 64,64))
         for i,key in enumerate(self.keys):
             _amsuRR= np.array(h5[key])[-1,:,:]
-            _amsuRR[_amsuRR>0]=1
-            _amsuRR[_amsuRR<=0]=0
             amsuRR[i]= _amsuRR
             
         return amsuRR

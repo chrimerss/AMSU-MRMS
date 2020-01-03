@@ -69,3 +69,17 @@ hyperparam_grid= {
 }
 gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', verbose=2, n_jobs=-1)
 ```
+
+|Regressor|Parameters|median RMSE (benchmark)|model name|
+|:-------:|:--------:|:--:|:--------:|
+|Random Forest|depth-10,estimators-800|1.05(12.09)|model-1|
+
+#### Results
+
+<p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-spatial.png'>
+
+<p align="center"> Fig.7 Spatial rainfall map for benchmark and model-1
+
+<p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-rmse.png', width="50%">
+
+<p align="center"> Fig.7 RMSE results for benchmark and model-1

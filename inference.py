@@ -56,6 +56,20 @@ def infer(model,type, pth, **kwargs):
             
 
 def post_process(probability, threshold, min_size):
+    '''
+    post process of segmentation array by using connected objects
+    Args:
+    ------------------
+    :probability - numpy.array; probability map
+    :threshold - int; binary thresholding
+    :min_size - minimum size of connected objects
+
+    Returns:
+    ------------------
+    :predictions - numpy.array; refined segmentation map
+    :num - int; total number of positive samples
+
+    '''
     mask = cv2.threshold(probability, threshold, 1, cv2.THRESH_BINARY)[1]
     num_component, component= cv2.connectedComponents(mask.astype(np.uint8))
     predictions= np.zeros((64,64), np.float32)
@@ -69,4 +83,40 @@ def post_process(probability, threshold, min_size):
     return predictions, num
 
 def sigmoid(x):
+    '''Sigmoid function'''
     return 1/(1+np.exp(-x))
+
+
+def predictSeg(rfModel, segModel, amsu):
+    '''
+    Predict rain rate based on random forest regressor and segmentation model
+
+    Args:
+    -----------------
+    :rfModel - RandomForestRegressor object;
+    :segModel - torch.nn.Module object;
+    :amsu - numpy array object; 
+
+    Return:
+    -----------------
+    :rains - numpy.array; predicted rainfall map
+    :outs - numpy.array; NSSL reference
+    :amsu - numpu.array; benchmark
+    '''
+    testhelper= DataRainRate('test')
+    ind= np.random.randint(len(testhelper))
+    ins, outs= testhelper[ind]
+    mask= segModel(ins.view(1,8,64,64)).detach().numpy().squeeze()
+    mask, _= post_process(mask, threshold=-4.464768, min_size=7)
+    rows, cols= np.where(mask==0)
+    ins[:, rows, cols]=0
+    
+    rows, cols= np.where(mask!=0)
+    feas= np.zeros((len(rows), 8))
+    for l in range(8):
+        feas[:,l]= ins[l, rows, cols]
+    sims= rfModel.predict(feas)
+    rains= np.zeros(outs.shape)
+    rains[rows, cols]= sims
+    
+    return rains, outs, amsu[ind]
