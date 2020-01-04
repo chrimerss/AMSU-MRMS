@@ -4,3 +4,4 @@ checkpoints/*
 None/*
 *.npy
 *.pkl
+*.pdf

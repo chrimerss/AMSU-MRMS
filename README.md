@@ -76,9 +76,11 @@ hyperparam_grid= {
 gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', verbose=2, n_jobs=-1)
 ```
 
-|Regressor|Parameters|median RMSE (benchmark)|model name|
-|:-------:|:--------:|:--:|:--------:|
-|Random Forest|depth-10,estimators-800|1.05(12.09)|model-1|
+|Regressor|Parameters|median RMSE (benchmark)|R^2 (train/test)|model name|
+|:-------:|:--------:|:--:|:--------:|:---:|
+|Random Forest|depth-10,estimators-800|1.05(12.09)|0.21/0.13|model-1|
+|Random Forest|depth-9, estimators-600|-|0.19/0.36|modeol-2|
+
 
 #### Results
 
@@ -89,3 +91,14 @@ gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-rmse.png', width="50%">
 
 <p align="center"> Fig.9 RMSE results for benchmark and model-1
+
+<p align="center"><img src="src/LinkNet-ResNet-model-2-residualPlot.png">
+
+<p align="center"> Fig.9 Residual plots of training and test results for model-2
+
+__feature Importance__
+
+|Model|23.8 GHz|31.4 GHz|89.0 GHz|89+0.9 GHz|150+0.9 GHz|183.31+0.1 GHz|183.31+0.3 GHz|183.31+7.0 GHz|
+|:---:|:-------:|:--:|:---:|:----:|:---:|:---:|:----:|:---:|
+|model-1|0.1033|0.0654|0.0774|0.2109|0.3645|0.0319|0.0843|0.0622|
+|model-2|0.0473|0.0313|0.0542|0.1983|0.5371|0.0173|0.0499|0.0644|
