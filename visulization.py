@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib as plt
 import pandas as pd
-from sklearn.metrics import confusion_matrix, roc_curve, auc
+from sklearn.metrics import confusion_matrix, roc_curve, auc, classification_report
 import scipy.stats as stats
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as peffects
@@ -10,6 +10,11 @@ from matplotlib import cm
 from sklearn.metrics import explained_variance_score, confusion_matrix
 from sklearn.metrics import roc_curve, precision_recall_curve, auc
 from mpl_toolkits.mplot3d import Axes3D
+import sys
+sys.path.append('/Users/hydrosou/Documents/PlotGallary')
+from matplotlibconfig import basic
+basic()
+
 
 def confusion_mtx_colormap(mtx, xnames, ynames, charlabel= "", **figkwargs):
     '''
@@ -54,6 +59,44 @@ def confusion_mtx_colormap(mtx, xnames, ynames, charlabel= "", **figkwargs):
                         ha="center", va="center", color="k")
 
     return fig, ax
+
+def plot_classificationReport(y_pred, y_true, **kwargs):
+    '''
+    Generate classification report plot including: precision, recall, f1-score, support
+
+    Args:
+    -----------------
+    :y_pred - numpy array; predicted labels
+    :y_true - numpy array; reference
+    :kwargs - dict of plot configurations
+
+    Returns:
+    -----------------
+    :fig - matplotlib.Figure()
+    :ax - current axes
+    '''
+    target_names= ['no rain', 'rain']
+    cmap= kwargs.pop('cmap', 'summer')
+
+    if not (isinstance(y_pred, np.array) and isinstance(y_true, np.array)):
+        raise ValueError('Expected numpy array input, but get: %s'%str(type(y_pred)))
+    _dict= classification_report(y_true, y_pred)
+    metrics= [_dict[_class][metric] for metric in _dict[_class].keys() for _class in _dict.keys()]
+    metrics= np.array(metrics).reshape(2,4)
+    X, Y= (
+        np.arange(len(target_names)+1),
+        np.arange(len(_dict.keys())+1)
+        )
+    fig, ax= plt.subplots()
+    ax.set_ylim(bottom=0, top=metrics.shape[0])
+    ax.set_xlim(bottom=0, top=metrics.shape[1])
+    im= ax.pcolormesh(
+        Y, X, metrics, vmin=0, vmax=1. cmap=cmap, **kwargs, edgecolor='w')
+    )
+    plt.colorbar(im, ax= ax)
+
+    return fig, ax
+    
 
 def ks_roc_plot(targets, scores, **figkwargs):
     '''
@@ -162,6 +205,7 @@ def plot_confusion_matrix(cm, classes, normalize=False,
     plt.savefig('confusion_mtx', bbox_inches="tight")
 
 
+
 # Compute the ROC and PR Curves and generate the KS plot
 def ks_roc_prc_plot(targets, scores, FIGWIDTH=15, FIGHEIGHT=6, FONTSIZE=14):
     ''' 
@@ -250,3 +294,12 @@ def objective_surface3D(paramX,paramY,z, view_angle=30, view_elev=30):
     ax.text(optimX, optimY, z[zmax], 'optimal point (-4.5,7,0.76)')
 
     return fig, ax
+
+
+
+
+
+
+
+
+        
