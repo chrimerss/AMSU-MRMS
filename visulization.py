@@ -78,22 +78,35 @@ def plot_classificationReport(y_pred, y_true, **kwargs):
     target_names= ['no rain', 'rain']
     cmap= kwargs.pop('cmap', 'summer')
 
-    if not (isinstance(y_pred, np.array) and isinstance(y_true, np.array)):
+    if not (isinstance(y_pred, np.ndarray) and isinstance(y_true, np.ndarray)):
         raise ValueError('Expected numpy array input, but get: %s'%str(type(y_pred)))
-    _dict= classification_report(y_true, y_pred)
-    metrics= [_dict[_class][metric] for metric in _dict[_class].keys() for _class in _dict.keys()]
+    _dict= classification_report(y_true, y_pred, output_dict=True)
+    print(_dict)
+    metrics= [_dict[_class][metric]  for _class in ['0.0', '1.0'] for metric in _dict[_class].keys()]
     metrics= np.array(metrics).reshape(2,4)
     X, Y= (
         np.arange(len(target_names)+1),
-        np.arange(len(_dict.keys())+1)
+        np.arange(5)
         )
-    fig, ax= plt.subplots()
+    fig, ax= plt.subplots(figsize=(12,6))
     ax.set_ylim(bottom=0, top=metrics.shape[0])
-    ax.set_xlim(bottom=0, top=metrics.shape[1])
+    ax.set_xlim(left=0, right=metrics.shape[1])
+    for x in X[:-1]:
+        for y in Y[:-1]:
+            value= metrics[x,y]
+            svalue= "{:0.3f}".format(value)
+            
+#             base_color= cmap(value)
+            cx, cy= 0.5+x, 0.5+y
+            ax.text(cy, cx, svalue, va="center", ha="center", color='k')
     im= ax.pcolormesh(
-        Y, X, metrics, vmin=0, vmax=1. cmap=cmap, **kwargs, edgecolor='w')
+        Y, X, metrics, vmin=0, vmax=1,cmap=cmap, **kwargs, edgecolor='w'
     )
     plt.colorbar(im, ax= ax)
+    ax.set_xticks(Y[:-1]+0.5)
+    ax.set_xticklabels(list(_dict['0.0'].keys()))
+    ax.set_yticks(X[:-1]+0.5)
+    ax.set_yticklabels(['no rain', 'rain'], fontsize=15)
 
     return fig, ax
     

@@ -50,7 +50,7 @@ def infer(model,type, pth, **kwargs):
         
         for j, probability in enumerate(output):
             probabilities.append(probability)
-            pr_mask[i+j,:, :], _= post_process(probability, threshold=kwargs.get('threshold', 0.9), min_size=kwargs.get('min_size', 5))
+            pr_mask[i+j,:, :], _= post_process(sigmoid(probability), threshold=kwargs.get('threshold', 0.9), min_size=kwargs.get('min_size', 5))
 
     return probabilities, pr_mask
             

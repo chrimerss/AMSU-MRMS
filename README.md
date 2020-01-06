@@ -53,13 +53,23 @@ __Results__
 
 <p align="center"> Fig.5 LinkNet-1class-8channels-benchmark results 
 
+<p align="center"><img src="src/LinkNet-ResNet-classificationReport-DL.png">
+
+<p align="center"> Fig.6 Classification report for LinkNet
+
+<p align="center"><img src="src/LinkNet-ResNet-classificationReport-AMSU.png">
+
+<p align="center"> Fig.7 Classification report for Benchmark
+
+
+
 <p align="center"> <img src='src/LinkNet-1class-8channels-PRAUC_curve.png' width="100%">
 
-<p align="center"> Fig.6 PR-AUC curve to determine the best threshold 
+<p align="center"> Fig.8 PR-AUC curve to determine the best threshold 
 
 <p align="center"> <img src='src/LinkNet-1class-8channels-optimalSurface.png' width="60%">
 
-<p align="center"> Fig.7 objective surface plot.
+<p align="center"> Fig.9 objective surface plot.
 
 ## Rainfall retrieval
 
@@ -80,21 +90,23 @@ gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', 
 |:-------:|:--------:|:--:|:--------:|:---:|
 |Random Forest|depth-10,estimators-800|1.05(12.09)|0.21/0.13|model-1|
 |Random Forest|depth-9, estimators-600|-|0.19/0.36|modeol-2|
+|Adaboost model-2|depth-9, estimators=600|-|-|model-3|
+|Adaboost model-1|depth-10, estimators=800|-|-|model-4|
 
 
 #### Results
 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-spatial.png'>
 
-<p align="center"> Fig.8 Spatial rainfall map for benchmark and model-1
+<p align="center"> Fig.10 Spatial rainfall map for benchmark and model-1
 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-rmse.png', width="50%">
 
-<p align="center"> Fig.9 RMSE results for benchmark and model-1
+<p align="center"> Fig.11 RMSE results for benchmark and model-1
 
 <p align="center"><img src="src/LinkNet-ResNet-model-2-residualPlot.png">
 
-<p align="center"> Fig.9 Residual plots of training and test results for model-2
+<p align="center"> Fig.12 Residual plots of training and test results for model-2
 
 __feature Importance__
 
