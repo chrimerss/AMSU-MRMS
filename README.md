@@ -1,6 +1,6 @@
 # Passive Microwave Precipitation Retrieval with deep learning
 
-
+<img src="src/polar_orbit.gif">
 
 
 In this study, we take two steps towards passive microwave (AMSU) precipitation retrival: first, segment satellite imagery into rain and no-rain classes (binary); second, apply second-round ML with rainy pixels.
