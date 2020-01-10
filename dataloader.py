@@ -24,9 +24,9 @@ def prepare():
     (12,64,64): rain rate by AMSU
     '''
     # initialize two .h5 file, one for training, the other two for validation and testing 7/2/1
-    train_h5= h5py.File('training2.h5', 'w')
-    test_h5 = h5py.File('testing2.h5', 'w')
-    val_h5 = h5py.File('validating2.h5', 'w')
+    train_h5= h5py.File('precipMaskTrain.h5', 'w')
+    test_h5 = h5py.File('precipMaskTest.h5', 'w')
+    # val_h5 = h5py.File('validating2.h5', 'w')
 
     # directories to store data
     dirs= ['/Users/hydrosou/Documents/NOAA18/AMSU_GROUND_MERGE_CORRECTED_2', '~/Documents/NOAA19/AMSU_GROUND_MERGE_CORRECTED_2']
@@ -165,8 +165,51 @@ def test():
     print(len(list(h5.keys())))
     # print(np.array(h5[1]))
 
+def pixelPrecipType():
+    folder= '/Users/hydrosou/Documents/NOAA18/AMSU_GROUND_MERGE_CORRECTED_2'
+    files= glob(folder+'/*.nc')
+    X= []
+    y= []
+    for i,single in enumerate(files):
+        data= Dataset(single, 'r') #read in netCDF4 object
+        lons= data['lon_amsub']    #store longitudes
+        lats= data['lat_amsub']    #store latitudes
+        mask= np.where((lons[:,0]<=-60) & (lons[:,-1]>=-130) & (lats[:, 0]<=55) & (lats[:, -1]>=25))[0] #mask out US boundary
+        rainBinary= (data['aver_precip_nssl'][:][mask]>0.1)
+        
+        rows, cols= np.where(rainBinary>0)
+        if len(rows)>0:
+            c1_amsua= np.array(data['c1_amsua'][:][mask][rows, cols].astype(np.float32))
+            c2_amsua= np.array(data['c2_amsua'][:][mask][rows, cols].astype(np.float32))
+            c15_amsua= np.array(data['c15_amsua'][:][mask][rows,cols].astype(np.float32))
+            c1_amsub= np.array(data['c1_amsub'][:][mask][rows, cols].astype(np.float32))
+            c2_amsub= np.array(data['c2_amsub'][:][mask][rows, cols].astype(np.float32))
+            c3_amsub= np.array(data['c3_amsub'][:][mask][rows, cols].astype(np.float32))
+            c4_amsub= np.array(data['c4_amsub'][:][mask][rows, cols].astype(np.float32))
+            c5_amsub= np.array(data['c5_amsub'][:][mask][rows, cols].astype(np.float32))
+            nsslMask= np.array(data['aver_mask_nssl'][:][rows, cols].astype(np.float32))
+            
+            print(c1_amsub.shape)
+            _X= np.concatenate([[c1_amsua], [c2_amsua], [c15_amsua], [c1_amsub], [c2_amsub], [c3_amsub], [c4_amsub], [c5_amsub]]).transpose(1,0)
+            print(_X.shape)
+            X.append(_X)
+            y.append(nsslMask)
+        print('%d/%d'%(i, len(files)))
+
+
+    X= np.concatenate(X)
+    y= np.concatenate(y)
+    # print(y)
+
+    np.save('PrecipTypeX.npy',X)
+    np.save('PrecipTypeY.npy',y)
+
+
+
+
 if __name__ =='__main__':
-    prepare()
+    # prepare()
+    pixelPrecipType()
     # test()
         
 
