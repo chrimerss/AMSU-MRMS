@@ -167,42 +167,72 @@ def test():
 
 def pixelPrecipType():
     folder= '/Users/hydrosou/Documents/NOAA18/AMSU_GROUND_MERGE_CORRECTED_2'
+    maskSurface= np.load('mask.npy')
     files= glob(folder+'/*.nc')
-    X= []
-    y= []
-    for i,single in enumerate(files):
+    X_land= []
+    y_land= []
+    y_land_rr= []
+    X_sea= []
+    y_sea= []
+    y_sea_rr= []
+    for k,single in enumerate(files):
         data= Dataset(single, 'r') #read in netCDF4 object
-        lons= data['lon_amsub']    #store longitudes
-        lats= data['lat_amsub']    #store latitudes
-        mask= np.where((lons[:,0]<=-60) & (lons[:,-1]>=-130) & (lats[:, 0]<=55) & (lats[:, -1]>=25))[0] #mask out US boundary
-        rainBinary= (data['aver_precip_nssl'][:][mask]>0.1)
-        
-        rows, cols= np.where(rainBinary>0)
-        if len(rows)>0:
-            c1_amsua= np.array(data['c1_amsua'][:][mask][rows, cols].astype(np.float32))
-            c2_amsua= np.array(data['c2_amsua'][:][mask][rows, cols].astype(np.float32))
-            c15_amsua= np.array(data['c15_amsua'][:][mask][rows,cols].astype(np.float32))
-            c1_amsub= np.array(data['c1_amsub'][:][mask][rows, cols].astype(np.float32))
-            c2_amsub= np.array(data['c2_amsub'][:][mask][rows, cols].astype(np.float32))
-            c3_amsub= np.array(data['c3_amsub'][:][mask][rows, cols].astype(np.float32))
-            c4_amsub= np.array(data['c4_amsub'][:][mask][rows, cols].astype(np.float32))
-            c5_amsub= np.array(data['c5_amsub'][:][mask][rows, cols].astype(np.float32))
-            nsslMask= np.array(data['aver_mask_nssl'][:][rows, cols].astype(np.float32))
+        lons= data['lon_amsub'][:]    #store longitudes
+        lats= data['lat_amsub'][:]    #store latitudes
+        maskBound= np.where((lons<=-60) & (lons>=-130) & (lats<=55) & (lats>=25)) #mask out US boundary
+        # indLats= lats[maskBound]
+        # indLons= lons[maskBound]
+
+        # print(np.where(data['aver_precip_nssl'][:][maskBound]>0.1))
+        indices= np.where(data['aver_precip_nssl'][:][maskBound]>0.1)[0]
+
+        if len(indices)>0:
+            c1_amsua= np.array(data['c1_amsua'][:][maskBound][indices].astype(np.float32))
+            c2_amsua= np.array(data['c2_amsua'][:][maskBound][indices].astype(np.float32))
+            c15_amsua= np.array(data['c15_amsua'][:][maskBound][indices].astype(np.float32))
+            c1_amsub= np.array(data['c1_amsub'][:][maskBound][indices].astype(np.float32))
+            c2_amsub= np.array(data['c2_amsub'][:][maskBound][indices].astype(np.float32))
+            c3_amsub= np.array(data['c3_amsub'][:][maskBound][indices].astype(np.float32))
+            c4_amsub= np.array(data['c4_amsub'][:][maskBound][indices].astype(np.float32))
+            c5_amsub= np.array(data['c5_amsub'][:][maskBound][indices].astype(np.float32))
+            nsslMask= np.array(data['aver_mask_nssl'][:][maskBound][indices].astype(np.float32))
+            rr= np.array(data['aver_precip_nssl'][:][maskBound][indices].astype(np.float32))
+
+            for i, ind in enumerate(indices):
+                lon, lat= np.round(lons[maskBound][ind],1), np.round(lats[maskBound][ind],1)
+                indRow, indCol= np.where((maskSurface[:,:,0]==lon) & (maskSurface[:,:,1]==lat))
+
+                # print(lon, lat)
+                surface= maskSurface[indRow, indCol,2]
+                if surface==0:
+                    X_sea.append([c1_amsua[i], c2_amsua[i], c15_amsua[i],
+                                     c1_amsub[i], c2_amsub[i], c3_amsub[i], c4_amsub[i],
+                                      c5_amsub[i]])
+                    y_sea.append(nsslMask[i])
+                    y_sea_rr.append(rr[i])
+                elif surface>0:
+                    X_land.append([c1_amsua[i], c2_amsua[i], c15_amsua[i],
+                                     c1_amsub[i], c2_amsub[i], c3_amsub[i], c4_amsub[i],
+                                      c5_amsub[i]])
+                    y_land.append(nsslMask[i])
+                    y_land_rr.append(rr[i])
+
             
-            print(c1_amsub.shape)
-            _X= np.concatenate([[c1_amsua], [c2_amsua], [c15_amsua], [c1_amsub], [c2_amsub], [c3_amsub], [c4_amsub], [c5_amsub]]).transpose(1,0)
-            print(_X.shape)
-            X.append(_X)
-            y.append(nsslMask)
-        print('%d/%d'%(i, len(files)))
+        print('%d/%d'%(k, len(files)))
 
 
-    X= np.concatenate(X)
-    y= np.concatenate(y)
-    # print(y)
+    X_land= np.array(X_land)
+    y_land= np.array(y_land)
+    X_sea= np.array(X_sea)
+    y_sea= np.array(y_sea)
+    print(X_land.shape, X_sea.shape, y_land.shape)
 
-    np.save('PrecipTypeX.npy',X)
-    np.save('PrecipTypeY.npy',y)
+    np.save('PrecipTypeX_land.npy',X_land)
+    np.save('PrecipTypeY_land.npy',y_land)
+    np.save('PrecipRateY_land.npy',y_land_rr)
+    np.save('PrecipTypeX_sea.npy',X_sea)
+    np.save('PrecipTypeY_sea.npy',y_sea)
+    np.save('PrecipRateY_sea.npy',y_sea_rr)
 
 
 
