@@ -5,6 +5,8 @@ import os
 import numpy as np
 from affine import Affine
 from osgeo import gdal
+import multiprocessing
+from functools import partial
 
 
 def prepare():
@@ -148,80 +150,96 @@ def test():
     print(len(list(h5.keys())))
     # print(np.array(h5[1]))
 
-def pixelPrecipData():
+def pixelPrecipData(threads):
     '''
     Make PrecipTypeY.npy including 10 classes
          PrecipRate.npy including nssl rain rates
          PrecipTypeX.npy including 12 features: 8 channels local pixels plus four non-local features (add lons, lats, surface type, dem)
     '''
+
     folder= '/Users/hydrosou/Documents/NOAA18/AMSU_GROUND_MERGE_CORRECTED_2'
     maskSurface= np.load('mask.npy')
-    files= glob(folder+'/*.nc')
+    files= glob(folder+'/*.nc')[:5]
     dem= gdal.Open('geotiffs/global_elevation.tif')
     dem_arr= dem.ReadAsArray()
     transform= Affine.from_gdal(*dem.GetGeoTransform())
     X= []
     ycls= []
     yrr= []
+    
 
-    for k,single in enumerate(files):
-        data= Dataset(single, 'r') #read in netCDF4 object
-        lons= data['lon_amsub'][:]    #store longitudes
-        lats= data['lat_amsub'][:]    #store latitudes
-        maskBound= np.where((lons<=-60) & (lons>=-130) & (lats<=60) & (lats>=25)) #mask out US boundary
-        # indLats= lats[maskBound]
-        # indLons= lons[maskBound]
+    with multiprocessing.Pool(threads) as pool:
+        iter_func= partial(thread, maskSurface, transform, dem_arr)
+        results= pool.map(iter_func, files)
 
-        # print(np.where(data['aver_precip_nssl'][:][maskBound]>0.1))
-        indices= np.where(data['aver_precip_nssl'][:][maskBound]>0.1)[0]
+    for (fea, precipClass, rainrate) in results:
+        if len(fea)>0:
+            X.append(fea)
+            ycls.append(precipClass)
+            yrr.append(rainrate)
 
-        if len(indices)>0:
-            c1_amsua= np.array(data['c1_amsua'][:][maskBound][indices].astype(np.float32))
-            c2_amsua= np.array(data['c2_amsua'][:][maskBound][indices].astype(np.float32))
-            c15_amsua= np.array(data['c15_amsua'][:][maskBound][indices].astype(np.float32))
-            c1_amsub= np.array(data['c1_amsub'][:][maskBound][indices].astype(np.float32))
-            c2_amsub= np.array(data['c2_amsub'][:][maskBound][indices].astype(np.float32))
-            c3_amsub= np.array(data['c3_amsub'][:][maskBound][indices].astype(np.float32))
-            c4_amsub= np.array(data['c4_amsub'][:][maskBound][indices].astype(np.float32))
-            c5_amsub= np.array(data['c5_amsub'][:][maskBound][indices].astype(np.float32))
-            nsslMask= np.array(data['aver_mask_nssl'][:][maskBound][indices].astype(np.float32))
-            rr= np.array(data['aver_precip_nssl'][:][maskBound][indices].astype(np.float32))
-
-            for i, ind in enumerate(indices):
-                lon, lat= np.round(lons[maskBound][ind],1), np.round(lats[maskBound][ind],1)
-                indRow, indCol= np.where((maskSurface[:,:,0]==lon) & (maskSurface[:,:,1]==lat))
-                indAMSURow, indAMSUCol= np.where((np.round(lons,1)==lon) & (np.round(lats,1)==lat))
-                demCol, demRow= ~transform*(lon, lat)
-                demPoint= dem_arr[int(demRow), int(demCol)]
-                # print(indASMURow, indASMUCol)
-                if len(indAMSURow)>1 and len(indAMSUCol)>1:
-                    indAMSURow= indAMSURow[0]
-                    indAMSUCol= indAMSUCol[0]
-                if 89>indAMSUCol>0:
-                    # print(indCOl)
-                    VI, VC, VX, VM= makeNeighboringData(data, indAMSURow, indAMSUCol)
-                    # print(lon, lat)
-                    surface= maskSurface[indRow, indCol, 2]
-                    # print(surface)
-                    X.append([c1_amsua[i], c2_amsua[i], c15_amsua[i],
-                                            c1_amsub[i], c2_amsub[i], c3_amsub[i], c4_amsub[i],
-                                            c5_amsub[i], VI, VC, VX, VM, surface, demPoint, lon, lat])
-                    ycls.append(nsslMask[i])
-                    yrr.append(rr[i])
-
-            
-        print('%d/%d'%(k, len(files)))
-
-
-    X= np.array(X)
-    ycls= np.array(ycls)
-    yrr= np.array(yrr)
+    X= np.concatenate(X)
+    ycls= np.concatenate(ycls)
+    yrr= np.concatenate(yrr)
 
     print(X.shape, ycls.shape, yrr.shape)
 
     np.save('PrecipPointsX.npy',X)
     np.save('PrecipPointsTypeY.npy',ycls)
     np.save('PrecipPointsRateY.npy',yrr)
+
+def thread( maskSurface, transform, dem_arr, single):
+    print('processing %s'%single)
+    X= []
+    ycls= []
+    yrr= []
+    data= Dataset(single, 'r') #read in netCDF4 object
+    lons= data['lon_amsub'][:]    #store longitudes
+    lats= data['lat_amsub'][:]    #store latitudes
+    maskBound= np.where((lons<=-60) & (lons>=-130) & (lats<=60) & (lats>=25)) #mask out US boundary
+    # indLats= lats[maskBound]
+    # indLons= lons[maskBound]
+
+    # print(np.where(data['aver_precip_nssl'][:][maskBound]>0.1))
+    indices= np.where(data['aver_precip_nssl'][:][maskBound]>0.1)[0]
+
+    if len(indices)>0:
+        c1_amsua= np.array(data['c1_amsua'][:][maskBound][indices].astype(np.float32))
+        c2_amsua= np.array(data['c2_amsua'][:][maskBound][indices].astype(np.float32))
+        c15_amsua= np.array(data['c15_amsua'][:][maskBound][indices].astype(np.float32))
+        c1_amsub= np.array(data['c1_amsub'][:][maskBound][indices].astype(np.float32))
+        c2_amsub= np.array(data['c2_amsub'][:][maskBound][indices].astype(np.float32))
+        c3_amsub= np.array(data['c3_amsub'][:][maskBound][indices].astype(np.float32))
+        c4_amsub= np.array(data['c4_amsub'][:][maskBound][indices].astype(np.float32))
+        c5_amsub= np.array(data['c5_amsub'][:][maskBound][indices].astype(np.float32))
+        nsslMask= np.array(data['aver_mask_nssl'][:][maskBound][indices].astype(np.float32))
+        rr= np.array(data['aver_precip_nssl'][:][maskBound][indices].astype(np.float32))
+        
+        for i, ind in enumerate(indices):
+            lon, lat= np.round(lons[maskBound][ind],1), np.round(lats[maskBound][ind],1)
+            indRow, indCol= np.where((maskSurface[:,:,0]==lon) & (maskSurface[:,:,1]==lat))
+            indAMSURow, indAMSUCol= np.where((np.round(lons,1)==lon) & (np.round(lats,1)==lat))
+            demCol, demRow= ~transform*(lon, lat)
+            demPoint= dem_arr[int(demRow), int(demCol)]
+            # print(indASMURow, indASMUCol)
+            if len(indAMSURow)>1 and len(indAMSUCol)>1:
+                indAMSURow= indAMSURow[0]
+                indAMSUCol= indAMSUCol[0]
+            if 89>indAMSUCol>0:
+                # print(indCOl)
+                VI, VC, VX, VM= makeNeighboringData(data, indAMSURow, indAMSUCol)
+                # print(lon, lat)
+                surface= maskSurface[indRow, indCol, 2].astype(float) 
+                surface= np.nan if len(surface)==0 else surface
+                # print(surface)
+                X.append([c1_amsua[i], c2_amsua[i], c15_amsua[i],
+                                        c1_amsub[i], c2_amsub[i], c3_amsub[i], c4_amsub[i],
+                                        c5_amsub[i], VI, VC, VX, VM, surface, demPoint, lon, lat])
+                ycls.append(nsslMask[i])
+                yrr.append(rr[i])
+
+    return np.array(X).astype(float), np.array(ycls).astype(float), np.array(yrr).astype(float)
+
 
 def makeNeighboringData(data, row, col):
     c5= np.array(data['c15_amsua'][:])
@@ -250,7 +268,7 @@ def makeNeighboringData(data, row, col):
 
 if __name__ =='__main__':
     # prepare()
-    pixelPrecipData()
+    pixelPrecipData(4)
     # test()
         
 
