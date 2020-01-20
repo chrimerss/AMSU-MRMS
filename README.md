@@ -71,6 +71,13 @@ __Results__
 
 <p align="center"> Fig.9 objective surface plot.
 
+## Precipitation type segmentation
+
+We used the same structure for precipitation type segmentation. However, the results are not satisfactory especially for convective and snow case.
+
+<p align="center"> <img src="src/LinkNet-precipType.png" width="60%">
+<p align="center">Fig. 10 precipitation type segmentation results
+
 ## Rainfall retrieval
 
 Attempt to use Random forest Regressor to quantify rain rate with grid search. The validation is based on KFolds, specifically 5 folds to validate data. It is running in 48 cores server, and it costs 60 hours to complete.
@@ -98,15 +105,15 @@ gridsearch= GridSearchCV(rf, hyperparam_grid, scoring='neg_mean_squared_error', 
 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-spatial.png'>
 
-<p align="center"> Fig.10 Spatial rainfall map for benchmark and model-1
+<p align="center"> Fig.11 Spatial rainfall map for benchmark and model-1
 
 <p align="center"><img src='src/LinkNet-ResNet-1class-8channels-rf-model1-rmse.png', width="50%">
 
-<p align="center"> Fig.11 RMSE results for benchmark and model-1
+<p align="center"> Fig.12 RMSE results for benchmark and model-1
 
 <p align="center"><img src="src/LinkNet-ResNet-model-2-residualPlot.png">
 
-<p align="center"> Fig.12 Residual plots of training and test results for model-2
+<p align="center"> Fig.13 Residual plots of training and test results for model-2
 
 __feature Importance__
 
