@@ -121,3 +121,30 @@ __feature Importance__
 |:---:|:-------:|:--:|:---:|:----:|:---:|:---:|:----:|:---:|
 |model-1|0.1033|0.0654|0.0774|0.2109|0.3645|0.0319|0.0843|0.0622|
 |model-2|0.0473|0.0313|0.0542|0.1983|0.5371|0.0173|0.0499|0.0644|
+
+### Tackle underestimation
+
+As in Fig.13 and Fig.11, they both show our trained forest underestimates the true rainfall value. In this chapter, we will investigate the reason.
+
+#### Reason 1: Variance in light rain rates
+
+
+<p align="center"><img src="src/variance_rain_rate_sort.png">
+<p align="center">Fig. 14 variance of brightless temperature as rain increases
+
+#### Sol.1: fit with clustered rain rates
+
+Because of the imbalanced data, meaning light rain occupies large portion of the rainy cases, thus we cluster the rain rates data by 100 instances as follows:
+
+<p align="center"><img src="src/variance_with_ranrate.png">
+<p align="center">Fig. 15 variance of brightless temperature as rain increases
+
+As rain rate increases, the variance gets increases until it meets ard 70 mm/hour and then decreases.
+
+#### Sol.2: Quantile Random Forests
+
+#### Reason 2: Precipitation Type plays an role
+
+Because the mechanism of precipitation formation, in generary, straitiform rainfall has mild rain rates and also mild emissivity from surface. However, convective rainfall normally associates with large rain rates, and more reduction in brightness temperature. On the other hand, snowfall rate is way smaller than rainfall rate. And the emissivity of snow is smaller as well. It is thus significant to understand the hydrometeor phase before prediction.
+
+#### Sol. 1 Predict hydrometeor phase
