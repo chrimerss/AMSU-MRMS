@@ -7,6 +7,7 @@ from catalyst.dl.runner import SupervisedRunner
 from catalyst.dl.callbacks import InferCallback, CheckpointCallback
 import numpy as np
 import cv2
+import torch
 
 def infer(model,type, pth, **kwargs):
     '''
@@ -53,7 +54,30 @@ def infer(model,type, pth, **kwargs):
             pr_mask[i+j,:, :], _= post_process(sigmoid(probability), threshold=kwargs.get('threshold', 0.9), min_size=kwargs.get('min_size', 5))
 
     return probabilities, pr_mask
-            
+
+def infer_event(arrs, model, **kwargs):
+    '''infer event based evaluation
+
+    Args:
+    -------------------
+    :arrs - numpy array; (64,64,8)
+    :model - pytorch model object
+    :pth - str; model weights path
+
+    Returns:
+    -------------------
+    :mask - numpy array; segmented array
+    '''
+    inputs= torch.Tensor(arrs)
+    if len(inputs.size())!=4:
+        inputs= inputs.view(1,-1, 64,64)
+    model.eval()
+    out= model(inputs).squeeze().detach().numpy()
+    mask= post_process(sigmoid(out), 0.98, 5)
+
+    return mask
+
+
 
 def post_process(probability, threshold, min_size):
     '''

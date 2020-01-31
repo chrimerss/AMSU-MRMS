@@ -148,3 +148,18 @@ As rain rate increases, the variance gets increases until it meets ard 70 mm/hou
 Because the mechanism of precipitation formation, in generary, straitiform rainfall has mild rain rates and also mild emissivity from surface. However, convective rainfall normally associates with large rain rates, and more reduction in brightness temperature. On the other hand, snowfall rate is way smaller than rainfall rate. And the emissivity of snow is smaller as well. It is thus significant to understand the hydrometeor phase before prediction.
 
 #### Sol. 1 Predict hydrometeor phase
+
+### Results
+
+|experiment|retrieval algorithm|segmentation|input features|rain type classification|
+|:--------:|:-----------------:|:----------:|:------------:|:------:|
+|Benchmark|GPROPH(?)|no|89GHz+150GHz|no|
+|simulation 1| RF|no|AMSU-a 3channels+ AMSU-b 5channels|no|
+|simulation 2| RF|yes|AMSU-a 3channels+ AMSU-b 5channels|no|
+|simulation 3| RF|yes|local features+non local features +geometric|no|
+|simulation 4| RF|yes|local features+non local features +geometric|yes|
+
+<img src= "src/benchmark_densityPlot.png" width="50%"><img src= "src/simulation1_densityPlot.png" width="50%">
+<img src= "src/simulation2_densityPlot.png" width="50%"><img src= "src/simulation3_densityPlot.png" width="50%">
+
+
