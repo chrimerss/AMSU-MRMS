@@ -1,5 +1,9 @@
 # Passive Microwave Precipitation Retrieval with deep learning
 
+Please cite our work if you found it useful!
+
+__Li, Z., Wen, Y., Schreier, M., Behrangi, A., Hong, Y., & Lambrigtsen, B. (2020). Advancing satellite precipitation retrievals with data driven approaches: is black box model explainable?. Earth and Space Science, 7, e2020EA001423. https://doi.org/10.1029/2020EA001423__
+
 <p align="center"><img src="src/polar_orbit.gif">
 
 
